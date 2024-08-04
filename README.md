@@ -32,15 +32,15 @@ I recommend looking at the [offficial Discordia documentation](https://github.co
 However, you can use the following commands to quickly get started:
 ```bash
 cd ~/Documents # Navigate to the home directory's Documents directory
-git clone https://github.com/knockzoo/AntiLinksBot # Clone the repository
-cd AntiLinksBot # Navigate into the repository
+git clone https://github.com/knockzoo/anti-links/ # Clone the repository
+cd anti-links # Navigate into the repository
 curl -L https://github.com/luvit/lit/raw/master/get-lit.sh | sh # Download and install lit
 ./lit install SinisterRectus/discordia # Install the discordia library
 ```
 
 Or all in one line:
 ```bash
-cd ~/Documents && git clone https://github.com/knockzoo/AntiLinksBot && cd AntiLinksBot && curl -L https://github.com/luvit/lit/raw/master/get-lit.sh | sh && ./lit install SinisterRectus/discordia
+cd ~/Documents && git clone https://github.com/knockzoo/anti-links/ && cd anti-links && curl -L https://github.com/luvit/lit/raw/master/get-lit.sh | sh && ./lit install SinisterRectus/discordia
 ```
 
 Now, you can create your bot application through the Discord Developer Portal if you haven't already.
@@ -74,7 +74,7 @@ If you feel that doing a per-role configuration is too much work, you can instea
 #### Starting up the bot
 After you have finished all the above steps, your project layout should be similar to the following:
 ```
-AntiLinksBot/
+anti-links/
 ├── src/
 │   ├── init.lua
 │   └── ...
