@@ -27,7 +27,7 @@ Unfortunately, this also means that **this bot will not work on Windows**, as th
 4. As mentioned above, a GNU+Linux operating system
 
 ### Installation
-I recommend looking at the [offficial Discordia documentation](https://github.com/SinisterRectus/Discordia/wiki/Installing-Discordia) as a starting point on how Discordia interacts with Luvit and vise-versa.
+I recommend looking at the [official Discordia documentation](https://github.com/SinisterRectus/Discordia/wiki/Installing-Discordia) as a starting point on how Discordia interacts with Luvit and vise-versa.
 
 However, you can use the following commands to quickly get started:
 ```bash

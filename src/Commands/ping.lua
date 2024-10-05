@@ -1,25 +1,43 @@
-local Requests, CreateObject, Colors =
-	require("src.Utils.Requests"), require("src.Utils.Commands.CreateObject"), require("src.Utils.Colors")
+local uv = require("uv")
+local Requests, CreateObject, Colors, Dates = require("src.Utils.Requests"), require("src.Utils.Commands.CreateObject"), require("src.Utils.Colors"), require("src.Utils.Dates")
+
+local function BytesToGigabytes(Bytes)
+	return Bytes / 1024 / 1024 / 1024
+end
 
 local function GetSystemStats()
-	local function Run(Cmd)
-		return io.popen(Cmd)
+	local function GetCPU()
+		local CPUInfo = uv.cpu_info()
+		local TotalUser, TotalNice, TotalSys, TotalIdle, TotalIrq = 0, 0, 0, 0, 0
+
+		for _, CPU in ipairs(CPUInfo) do
+			TotalUser = TotalUser + CPU.times.user
+			TotalNice = TotalNice + CPU.times.nice
+			TotalSys = TotalSys + CPU.times.sys
+			TotalIdle = TotalIdle + CPU.times.idle
+			TotalIrq = TotalIrq + CPU.times.irq
+		end
+
+		local TotalUsage = TotalUser + TotalNice + TotalSys + TotalIrq
+		local TotalTime = TotalUsage + TotalIdle
+
+		return (TotalUsage / TotalTime) * 100
 	end
 
-	local Command = [[
-			vmstat 1 2 | tail -1 | awk '{print 100 - $15}' && 
-			free | grep Mem | awk '{print $3/$2 * 100.0}'
-		]]
+	local function GetMemoryUsage()
+		local TotalMem = BytesToGigabytes(uv.get_total_memory())
+		local FreeMem = BytesToGigabytes(uv.get_free_memory())
+		local UsedMem = TotalMem - FreeMem
+		local UsedMemPercent = (UsedMem / TotalMem) * 100
 
-	local Handle = Run(Command)
-	local Output = Handle:read("a")
-	Handle:close()
+		return UsedMemPercent, TotalMem, FreeMem, UsedMem
+	end
 
-	local CPU, RAM = Output:match("(%d+%.?%d*)%s+(%d+%.?%d*)")
+	local CPU, RAM, TotalMem, FreeMem, UsedMem = GetCPU(), GetMemoryUsage()
 
 	return {
-		["CPU"] = CPU,
-		["RAM"] = RAM,
+		["CPU"] = string.format("%.2f%%", CPU),
+		["RAM"] = string.format("%.2f%% (%.2fGB / %.2fGB)", RAM, UsedMem, TotalMem),
 	}
 end
 
@@ -32,13 +50,19 @@ return CreateObject()
 	:SetServerOnly(false)
 	:SetCallback(function(Received)
 		local Message = Received.Message
-
-		local Start = os.clock()
-		local Response = Requests.Get("https://discord.com/api/v9/gateway/bot")
-		local End = os.clock()
-		local Latency = math.floor((End - Start) * 1000000)
+		local Client = Received.Client
 
 		local SystemStats = GetSystemStats()
+
+		local Latency = Client._latency
+		if not Latency then
+			Message:reply("Waiting for heartbeat connection...")
+			local Timedout, Shard, Delay = Client:waitFor("heartbeat")
+			Latency = Delay
+		end
+
+		-- ":information_source: Info:"
+		-- ":inbox_tray: **Latency:** `%dms`\n:hourglass: **Uptime:** `%s`\n:computer: **Resources**:\n**  **CPU: `%s%%`\n**  **RAM: `%s%%`"
 
 		local Response = {
 			embed = {
@@ -46,20 +70,10 @@ return CreateObject()
 				color = Colors.Green.Light,
 				fields = {
 					{
-						name = "Latency",
-						value = string.format("%dms", Latency),
-						inline = true,
-					},
-					{
-						name = "CPU",
-						value = string.format("%s%%", SystemStats["CPU"]),
-						inline = true,
-					},
-					{
-						name = "RAM",
-						value = string.format("%s%%", SystemStats["RAM"]:sub(1, 4)),
-						inline = true,
-					},
+						name = ":information_source: Info",
+						value = string.format(":inbox_tray: **Latency:** `%dms`\n:hourglass: **Uptime:** `%s`\n:computer: **Resources**:\n**  **CPU: `%s`\n**  **RAM: `%s`", Latency,  Dates.Convert.SecondsToRelative(os.time() - Client._init), SystemStats["CPU"], SystemStats["RAM"]),
+						inline = false,
+					}
 				},
 			},
 		}

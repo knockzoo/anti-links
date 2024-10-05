@@ -61,18 +61,11 @@ local function RoleCheck(Message)
 end
 
 return function(Received)
-    local Content = Received.Message.content
-    local Author = Received.Message.author
+    local Message = Received.Message
+    local Content = Message.content
+    local Author = Message.author
 
-    if PermsCheck(Received.Message) then
-        return
-    end
-
-    if ChannelCheck(Received.Message) then
-        return
-    end
-
-    if RoleCheck(Received.Message) then
+    if PermsCheck(Message) or ChannelCheck(Message) or RoleCheck(Message) then
         return
     end
 

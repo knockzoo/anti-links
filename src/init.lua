@@ -15,6 +15,7 @@ local Token = Settings.BotToken
 local Status = Settings.Status
 
 local Init = os.time()
+Client._init = Init
 
 Discordia.extensions()
 
@@ -53,24 +54,40 @@ Client:on("ready", function()
 	end
 end)
 
+Client:on("heartbeat", function(Shard, Latency)
+	Client._latency = Latency
+end)
+
 Client:on("messageCreate", function(Message)
 	local Content, Author = Message.content, Message.author
 	if Author.bot or Author == Client.user then
 		return
 	end
 
-	URLCheck({ Message = Message })
+	if Message.guild then -- Only monitor for messages sent in servers - patches bug causing the bot to error when a URL is sent in direct messages.
+		URLCheck({ Message = Message })
+	end
 
 	local Parsed = ParseCommands(Content)
 
 	if not Parsed or not DoesExist(Parsed.Command, Commands) then
 		return
 	end
+	
+	if Settings["DisabledCommands"][Parsed.Command] then
+    	local Response = {
+    		embed = {
+                title = "❌ Command Disabled",
+                description = "This command has been disabled by the bot maintainer.",
+    			color = Colors.Red.Light
+    		},
+    	}
+
+	   return Message:reply(Response)
+	end
 
 	local CommandObject = Commands[Parsed.Command]
-	local Callable, Args =
-		CommandObject,
-		{ Message = Message, Arguments = Parsed.Arguments, Client = Client, Init = Init, Commands = Commands }
+	local Callable, Args = CommandObject, { Message = Message, Arguments = Parsed.Arguments, Client = Client, Init = Init, Commands = Commands }
 	if not CommandObject.Coroutine then
 		Callable(Args)
 	else

@@ -27,6 +27,23 @@ Dates.Convert = {
     end,
     SecondsToDays = function(Seconds)
         return math.floor(Dates.Convert.SecondsToHours(Seconds) / 24)
+    end,
+    SecondsToRelative = function(Seconds)
+        local Minute, Hour, Day = 60, 60 * 60, (60 * 60) * 24
+        local IsPlural
+        if Seconds < Minute then
+            IsPlural = (Seconds == 1 and "") or "s"
+            return string.format("%d second%s", Seconds, IsPlural)
+        elseif Seconds < Hour then
+            IsPlural = (Minute == 1 and "") or "s"
+            return string.format("%d minute%s", Dates.Convert.SecondsToMinutes(Seconds), IsPlural)
+        elseif Seconds < Day then
+            IsPlural = (Hour == 1 and "") or "s"
+            return string.format("%d hour%s", Dates.Convert.SecondsToHours(Seconds), IsPlural)
+        else
+            IsPlural = (Day == 1 and "") or "s"
+            return string.format("%d day%s", Dates.Convert.SecondsToDays(Seconds), IsPlural)
+        end
     end
 }
 

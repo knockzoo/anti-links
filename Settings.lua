@@ -1,7 +1,7 @@
 return {
-	["Version"] = "0.0.2",
+	["Version"] = "0.0.3",
 	["Prefix"] = ".",
-	["BotToken"] = "",
+	["BotToken"] = "", -- Put your bot token in here
 	["Status"] = "Preventing unauthorized URLs",
 	["Blacklisted"] = {
 		["*all"] = true, -- Blocks ALL domains/URLs
@@ -25,5 +25,9 @@ return {
     ["WhitelistedRoles"] = { -- List of roles that are allowed to send ANY URL
         ["1147601297562931290"] = true,
         ["1147580026854846514"] = true
+    },
+    ["DisabledCommands"] = {
+        ["commandnamehere"] = true,
+        ["neofetch"] = true
     }
 }

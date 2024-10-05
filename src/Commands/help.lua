@@ -1,4 +1,4 @@
-local ObjectBuilder, Colors = require("src.Utils.Commands.CreateObject"), require("src.Utils.Colors")
+local ObjectBuilder, Colors, Settings = require("src.Utils.Commands.CreateObject"), require("src.Utils.Colors"), require("Settings")
 
 return ObjectBuilder()
 	:SetName("help")
@@ -23,7 +23,9 @@ return ObjectBuilder()
         for CatName, Category in pairs(Categories) do
             Result = Result .. "## " .. CatName .. ":\n"
             for _, Command in pairs(Category) do
-                Result = Result .. string.format("### %s\n> **Description:** %s\n> **Usage:** ```%s```\n\n", Command.Name, Command.Description, Command.Usage)
+                local Disabled = Settings["DisabledCommands"][Command.Name]
+                
+                Result = Result .. string.format("### %s\n> **Description:** %s\n> **Usage:** ```%s```\n%s\n", Command.Name, Command.Description, Command.Usage, Disabled and "> **Warning:** This command has been disabled\n" or "")
             end
         end
 

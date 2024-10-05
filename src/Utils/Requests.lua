@@ -1,4 +1,5 @@
 -- also not used, but this is useful for any bots that contact a third party api
+-- i am deeply retarded, luvit has this built in
 
 local Requests = {Format = {}}
 
